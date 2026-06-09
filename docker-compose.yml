@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jogjasplorasi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jogjasplorasi
+    ports:
+      - "5432:5432"
+    volumes:
+      - jogjasplorasi_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jogjasplorasi"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    container_name: jogjasplorasi-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/jogjasplorasi?schema=public
+      JWT_SECRET: change_this_in_production_to_a_long_random_secret_32_chars_minimum
+      JWT_EXPIRES_IN: 7d
+      PUBLIC_BASE_URL: http://localhost:3000
+      CORS_ORIGIN: '*'
+      JSON_LIMIT: 2mb
+      LOG_LEVEL: info
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX: 600
+      AUTH_RATE_LIMIT_WINDOW_MS: 900000
+      AUTH_RATE_LIMIT_MAX: 100
+      UPLOAD_RATE_LIMIT_WINDOW_MS: 3600000
+      UPLOAD_RATE_LIMIT_MAX: 80
+      AVATAR_MAX_SIZE: 2097152
+      BACKUP_DIR: ./backups
+      AI_GUIDE_MODE: local
+      AI_GUIDE_MAX_CONTEXT_DESTINATIONS: 8
+    ports:
+      - "3000:3000"
+    volumes:
+      - jogjasplorasi_uploads:/app/uploads
+      - jogjasplorasi_backups:/app/backups
+    command: sh -c "npx prisma generate && npx prisma db push && npm run db:seed && npm run prod:start"
+
+volumes:
+  jogjasplorasi_pgdata:
+  jogjasplorasi_uploads:
+  jogjasplorasi_backups:

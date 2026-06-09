@@ -1,0 +1,59 @@
+{
+  "name": "jogjasplorasi-backend",
+  "version": "8.0.0",
+  "description": "Phase 8 backend API with database-grounded AI tour guide, AI itinerary suggestion, and conversation history for JogjaSplorasi",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset --force",
+    "lint:check": "node scripts/check-env.js",
+    "backup:db": "node scripts/backup-db.js",
+    "restore:db": "node scripts/restore-db.js",
+    "prod:start": "NODE_ENV=production node src/server.js",
+    "setup": "node scripts/setup-dev.js",
+    "doctor": "node scripts/doctor.js",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:ready": "node scripts/wait-for-db.js",
+    "dev:ready": "npm run db:ready && npm run dev",
+    "db:deploy": "prisma migrate deploy",
+    "setup:real": "npm install && npm run lint:check && npm run db:prepare",
+    "start:real": "npm run lint:check && npm run db:prepare && npm start",
+    "db:prepare": "npx prisma@5.22.0 generate && npx prisma@5.22.0 db push && npm run db:seed",
+    "dev:full": "npm install && npm run db:prepare && npm run dev",
+    "start:full": "npm install && npm run db:prepare && npm start",
+    "reset:full": "npx prisma@5.22.0 db push --force-reset && npm run db:seed",
+    "cleanup": "node scripts/cleanup-obsolete-files.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "slugify": "^1.6.6",
+    "zod": "^3.23.8",
+    "express-rate-limit": "^7.4.1",
+    "compression": "^1.7.4",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prisma": "^5.22.0",
+    "pino-pretty": "^11.3.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

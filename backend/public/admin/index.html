@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JogjaSplorasi Admin</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#111318;color:#f4f4f5;margin:0;padding:24px} .wrap{max-width:1100px;margin:auto}.card{background:#1b1f2a;border:1px solid #303542;border-radius:18px;padding:18px;margin:14px 0}input,textarea,select{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px;border-radius:10px;border:1px solid #3a4050;background:#111318;color:#fff}button{border:0;border-radius:999px;padding:10px 16px;background:#b88955;color:#fff;cursor:pointer}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #303542;padding:8px;text-align:left}.muted{color:#a1a1aa}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.danger{background:#78350f}.ok{color:#86efac}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>JogjaSplorasi Admin</h1>
+    <p class="muted">Panel sederhana Phase 2 untuk mengelola destinasi dan bank soal. Login memakai akun admin dari seed.</p>
+    <section class="card">
+      <h2>Login Admin</h2>
+      <div class="grid"><input id="email" value="admin@jogjasplorasi.local" placeholder="Email"><input id="password" type="password" value="Admin12345" placeholder="Password"></div>
+      <button onclick="login()">Login</button> <span id="loginStatus" class="muted"></span>
+    </section>
+    <section class="card"><h2>Ringkasan</h2><button onclick="loadSummary()">Refresh</button><pre id="summary" class="muted"></pre></section>
+    <section class="card">
+      <h2>Tambah Destinasi</h2>
+      <div class="grid"><input id="dName" placeholder="Nama"><select id="dType"><option value="TOURISM">Wisata</option><option value="CULINARY">Kuliner</option><option value="CULTURE">Budaya</option></select><input id="dCategory" placeholder="Kategori"><input id="dAddress" placeholder="Alamat"><input id="dLat" placeholder="Latitude" type="number" step="any"><input id="dLng" placeholder="Longitude" type="number" step="any"><input id="dTags" placeholder="Tag, pisah koma"><input id="dImage" placeholder="Image URL"></div>
+      <textarea id="dDescription" placeholder="Deskripsi"></textarea><textarea id="dInsight" placeholder="Local insight / tips"></textarea><button onclick="addDestination()">Simpan Destinasi</button>
+    </section>
+    <section class="card"><h2>Destinasi Terbaru</h2><button onclick="loadDestinations()">Muat</button><table><thead><tr><th>Nama</th><th>Tipe</th><th>Kategori</th><th>Aktif</th></tr></thead><tbody id="destinations"></tbody></table></section>
+    <section class="card">
+      <h2>Tambah Soal Quiz</h2>
+      <input id="qText" placeholder="Pertanyaan"><input id="qCategory" placeholder="Kategori"><textarea id="qExplanation" placeholder="Penjelasan jawaban"></textarea>
+      <div class="grid"><input id="o0" placeholder="Opsi benar"><input id="o1" placeholder="Opsi salah 1"><input id="o2" placeholder="Opsi salah 2"><input id="o3" placeholder="Opsi salah 3"></div><button onclick="addQuestion()">Simpan Soal</button>
+    </section>
+  </div>
+<script>
+let token = localStorage.getItem('adminToken') || '';
+const api = (path, options={}) => fetch('/api'+path, { ...options, headers: { 'Content-Type':'application/json', ...(token?{Authorization:'Bearer '+token}:{}), ...(options.headers||{}) }}).then(async r=>{const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.message||'Request failed'); return j});
+async function login(){try{const r=await api('/auth/login',{method:'POST',body:JSON.stringify({email:email.value,password:password.value})}); token=r.token; localStorage.setItem('adminToken',token); loginStatus.innerHTML='<span class="ok">Login berhasil</span>'; loadSummary(); loadDestinations();}catch(e){loginStatus.textContent=e.message}}
+async function loadSummary(){summary.textContent=JSON.stringify(await api('/admin/summary'),null,2)}
+async function loadDestinations(){const rows=await api('/admin/destinations?active=true'); destinations.innerHTML=rows.slice(0,50).map(d=>`<tr><td>${d.name}</td><td>${d.type}</td><td>${d.category}</td><td>${d.isActive?'Ya':'Tidak'}</td></tr>`).join('')}
+async function addDestination(){const body={name:dName.value,type:dType.value,category:dCategory.value,address:dAddress.value,latitude:Number(dLat.value),longitude:Number(dLng.value),description:dDescription.value,localInsight:dInsight.value||null,imageUrl:dImage.value||null,tags:dTags.value.split(',').map(x=>x.trim()).filter(Boolean),isFeatured:false,isActive:true}; await api('/admin/destinations',{method:'POST',body:JSON.stringify(body)}); alert('Destinasi tersimpan'); loadDestinations(); loadSummary();}
+async function addQuestion(){const opts=[o0.value,o1.value,o2.value,o3.value].filter(Boolean).map((optionText,i)=>({optionText,isCorrect:i===0})); await api('/admin/quiz/questions',{method:'POST',body:JSON.stringify({questionText:qText.value,category:qCategory.value||'umum',explanation:qExplanation.value,options:opts})}); alert('Soal tersimpan'); loadSummary();}
+if(token){loadSummary().catch(()=>{});loadDestinations().catch(()=>{});}
+</script>
+</body>
+</html>

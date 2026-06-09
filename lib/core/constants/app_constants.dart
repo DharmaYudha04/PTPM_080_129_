@@ -1,0 +1,22 @@
+abstract final class AppConstants {
+  static const usersBox = 'users';
+  static const destinationsBox = 'destinations';
+  static const quizScoresBox = 'quiz_scores';
+  static const favoritesKey = 'favorites';
+  static const weatherCacheKey = 'weather_cache';
+  static const weatherCacheTimeKey = 'weather_cache_time';
+  static const currencyCacheKey = 'currency_cache';
+  static const currencyCacheTimeKey = 'currency_cache_time';
+  static const currencyCacheUpdatedAtKey = 'currency_cache_updated_at';
+  static const currencyCacheNextUpdateKey = 'currency_cache_next_update';
+  static const currencyCacheSourceKey = 'currency_cache_source';
+  static const currencyCacheFallbackKey = 'currency_cache_fallback';
+  static const quizReminderKey = 'quiz_last_played';
+  static const sessionKey = 'session_token';
+  static const sessionHashKey = 'session_hash';
+  static const sessionUserKey = 'session_user_email';
+  static const sessionExpiryKey = 'session_expiry';
+  static const biometricEnabledKey = 'biometric_enabled';
+  static const biometricAuthTokenKey = 'biometric_auth_token';
+  static const currentUserKey = 'current_user_email';
+}
